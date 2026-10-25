@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Admin</title>
+<style>
+body{font-family:system-ui,sans-serif;background:#0b0f1e;color:#fff;margin:auto;padding:16px;max-width:560px}
+input,select,textarea,button{width:100%;padding:12px;margin:5px 0;border-radius:10px;border:1px solid #ffffff33;background:#ffffff12;color:#fff;font-size:1rem;font-family:inherit}
+select option{color:#000}
+button{background:#6c5ce7;border:0;font-weight:600;cursor:pointer}
+button.g{background:#ffffff1f}
+button.r{background:#d63031}
+.card{background:#ffffff10;border:1px solid #ffffff22;border-radius:14px;padding:14px;margin:10px 0}
+.card button{font-size:.85rem;padding:10px 4px}
+.row{display:flex;gap:6px}
+.hide{display:none}
+label{font-size:.85rem;opacity:.8}
+</style>
+</head>
+<body>
+<h2>Review Card Admin</h2>
+
+<div id="login">
+  <label>GitHub username</label><input id="u">
+  <label>Repo name</label><input id="r">
+  <label>Branch</label><input id="b" value="main">
+  <label>GitHub token (this is your password)</label><input id="t" type="password">
+  <button onclick="connect()">Connect</button>
+</div>
+
+<div id="app" class="hide">
+  <button onclick="newCard()">+ New card</button>
+  <div id="list"></div>
+  <div id="form" class="hide card">
+    <label>Card code (the number in the chip link)</label><input id="f_code">
+    <label>Category</label><select id="f_cat" onchange="fillPrompts()"></select>
+    <label>Shop name</label><input id="f_name">
+    <label>Logo (file name like logo.png, or a full image link)</label><input id="f_logo">
+    <label>Google review link</label><input id="f_google">
+    <label>Instagram (username or link)</label><input id="f_ig">
+    <label>WhatsApp (number with country code, or link)</label><input id="f_wa">
+    <label>Prompts (one per line)</label><textarea id="f_prompts" rows="8"></textarea>
+    <button onclick="saveCard()">Save</button>
+    <button class="g" onclick="$('form').classList.add('hide')">Cancel</button>
+  </div>
+  <button class="g" onclick="logout()">Log out</button>
+</div>
+
+<script>
+const $=id=>document.getElementById(id);
+let cfg=JSON.parse(localStorage.getItem('cfg')||'null'),data,sha;
+const api=()=>`https://api.github.com/repos/${cfg.u}/${cfg.r}/contents/shops.json`;
+const hd=()=>({Authorization:'Bearer '+cfg.t,Accept:'application/vnd.github+json'});
+const b64=s=>{let b='';new TextEncoder().encode(s).forEach(x=>b+=String.fromCharCode(x));return btoa(b)};
+const link=c=>new URL('./?c='+encodeURIComponent(c),location.href).href;
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+
+async function load(){
+  const res=await fetch(api()+'?ref='+cfg.b+'&t='+Date.now(),{headers:hd()});
+  if(!res.ok)throw new Error('Login failed ('+res.status+'). Check username, repo, branch and token.');
+  const j=await res.json();sha=j.sha;
+  data=JSON.parse(new TextDecoder().decode(Uint8Array.from(atob(j.content.replace(/\n/g,'')),c=>c.charCodeAt(0))));
+  data.shops=data.shops||{};
+}
+async function save(msg){
+  const res=await fetch(api(),{method:'PUT',headers:hd(),body:JSON.stringify({message:msg,content:b64(JSON.stringify(data,null,2)),sha,branch:cfg.b})});
+  if(!res.ok){alert('Save failed ('+res.status+'). Reloading.');await load();render();return false}
+  sha=(await res.json()).content.sha;return true;
+}
+async function connect(){
+  cfg={u:$('u').value.trim(),r:$('r').value.trim(),b:$('b').value.trim()||'main',t:$('t').value.trim()};
+  try{await load();localStorage.setItem('cfg',JSON.stringify(cfg));start()}catch(e){alert(e.message)}
+}
+function start(){
+  $('login').classList.add('hide');$('app').classList.remove('hide');render();
+  const c=new URLSearchParams(location.search).get('c');if(c)edit(c);
+}
+function logout(){localStorage.removeItem('cfg');location.href='admin.html'}
+
+function render(){
+  const k=Object.keys(data.shops);
+  $('list').innerHTML=k.length?k.map(c=>{const s=data.shops[c];
+    return `<div class="card"><b>${esc(s.name||'(no name)')}</b><br><small>Code ${esc(c)} · ${esc(s.category)}</small>
+    <div class="row"><button class="g" onclick="window.open(link('${c}'))">View</button>
+    <button class="g" onclick="navigator.clipboard.writeText(link('${c}'));alert('Link copied')">Copy</button>
+    <button class="g" onclick="edit('${c}')">Edit</button>
+    <button class="r" onclick="del('${c}')">Delete</button></div></div>`}).join(''):'<p>No cards yet. Tap + New card.</p>';
+}
+function edit(c){
+  const s=data.shops[c]||{category:'general'};
+  $('f_cat').innerHTML=Object.keys(data.categories).map(k=>`<option>${k}</option>`).join('');
+  $('f_code').value=c;$('f_cat').value=s.category;$('f_name').value=s.name||'';$('f_logo').value=s.logo||'';
+  $('f_google').value=s.google||'';$('f_ig').value=s.instagram||'';$('f_wa').value=s.whatsapp||'';
+  $('f_prompts').value=(s.prompts||data.categories[s.category]||[]).join('\n');
+  $('form').classList.remove('hide');$('form').scrollIntoView();
+}
+function newCard(){
+  const n=Object.keys(data.shops).map(Number).filter(x=>!isNaN(x));
+  edit(String((n.length?Math.max(...n):100)+1));
+}
+function fillPrompts(){$('f_prompts').value=(data.categories[$('f_cat').value]||[]).join('\n')}
+async function saveCard(){
+  const c=$('f_code').value.trim().replace(/[^a-zA-Z0-9_-]/g,'');
+  if(!c)return alert('Enter a card code');
+  data.shops[c]={name:$('f_name').value.trim(),category:$('f_cat').value,logo:$('f_logo').value.trim(),
+    google:$('f_google').value.trim(),instagram:$('f_ig').value.trim(),whatsapp:$('f_wa').value.trim(),
+    prompts:$('f_prompts').value.split('\n').map(x=>x.trim()).filter(Boolean)};
+  if(await save('Update card '+c)){$('form').classList.add('hide');render();alert('Saved! Live in about a minute.')}
+}
+async function del(c){
+  if(!confirm('Delete card '+c+'?'))return;
+  delete data.shops[c];if(await save('Delete card '+c))render();
+}
+if(cfg)load().then(start).catch(()=>{});
+</script>
+</body>
+</html>

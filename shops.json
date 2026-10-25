@@ -1,0 +1,61 @@
+{
+  "categories": {
+    "restaurant": [
+      "The food was fresh, hot and full of flavour.",
+      "Loved the taste! Generous portions and worth the price.",
+      "Quick service and very friendly staff.",
+      "Clean place with a lovely atmosphere.",
+      "Great value for money. We will definitely come back.",
+      "Perfect for family and friends to hang out."
+    ],
+    "cafe": [
+      "Amazing coffee and a really cosy vibe.",
+      "Loved the snacks and desserts, so fresh!",
+      "Great place to relax, work or catch up with friends.",
+      "Friendly staff and quick service.",
+      "Clean, calm and beautifully set up.",
+      "Fair prices for the quality. Will visit again!"
+    ],
+    "gym": [
+      "Well-equipped gym with clean machines and plenty of space.",
+      "Trainers are supportive and really know their stuff.",
+      "Great atmosphere that keeps you motivated.",
+      "Clean and hygienic, with good ventilation.",
+      "Flexible timings and friendly staff.",
+      "Worth every rupee. Highly recommend joining!"
+    ],
+    "clothing": [
+      "Great collection with the latest styles and good quality.",
+      "Found exactly what I was looking for at a fair price.",
+      "Staff were helpful and never pushy.",
+      "Easy trial rooms and smooth billing.",
+      "Good variety for men, women and kids.",
+      "Will definitely shop here again!"
+    ],
+    "juice": [
+      "Fresh juices with no artificial taste at all.",
+      "So refreshing and made right in front of you.",
+      "Hygienic place and very friendly service.",
+      "Great variety of fruit juices and shakes.",
+      "Reasonable prices and generous quantity.",
+      "My go-to spot for a healthy drink!"
+    ],
+    "salon": [
+      "Loved my haircut. Exactly what I asked for!",
+      "Professional stylists who listen to what you want.",
+      "Clean, hygienic and relaxing salon.",
+      "Great service and a very friendly team.",
+      "Reasonable prices for the quality of work.",
+      "Will definitely be back. Highly recommended!"
+    ],
+    "general": [
+      "Friendly staff and excellent service.",
+      "Great quality and very good value for money.",
+      "Clean, welcoming place.",
+      "Quick and hassle-free experience.",
+      "Would definitely recommend to friends and family.",
+      "Will visit again soon!"
+    ]
+  },
+  "shops": {}
+}

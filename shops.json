@@ -57,5 +57,22 @@
       "Will visit again soon!"
     ]
   },
-  "shops": {}
+  "shops": {
+    "101": {
+      "name": "",
+      "category": "general",
+      "logo": "",
+      "google": "",
+      "instagram": "",
+      "whatsapp": "",
+      "prompts": [
+        "Friendly staff and excellent service.",
+        "Great quality and very good value for money.",
+        "Clean, welcoming place.",
+        "Quick and hassle-free experience.",
+        "Would definitely recommend to friends and family.",
+        "Will visit again soon!"
+      ]
+    }
+  }
 }
